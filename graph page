@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Disease Tracker</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
+    padding: 0;
+}
+header {
+    background-color: #4CAF50;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    font-size: 24px;
+}
+.container {
+    max-width: 500px;
+    margin: 30px auto;
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+input[type="text"], input[type="number"] {
+    padding: 6px 10px;
+    margin: 5px 0;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    width: 120px;
+}
+button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    margin: 10px 5px 20px 0;
+}
+button:hover { background-color: #45a049; }
+canvas {
+    display: block;
+    margin: 20px auto;
+    background-color: #f7f7f7;
+    border-radius: 12px;
+    padding: 10px;
+}
+#inputContainer div { margin-bottom: 8px; }
+#analysis { margin-top: 20px; padding: 15px; border-radius: 12px; background-color: #f7f7f7; }
+#analysis p { margin: 5px 0; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<header>Disease Tracker</header>
+
+<div class="container">
+    <!-- Step 1: Disease Name -->
+    <div id="step1">
+        <label>Disease Name:</label>
+        <input type="text" id="diseaseName" placeholder="e.g., Diabetes">
+        <button onclick="nextStep()">Next</button>
+    </div>
+
+    <!-- Step 2: Number of Months -->
+    <div id="step2" style="display:none;">
+        <label>Number of Months:</label>
+        <input type="number" id="numMonths" min="1" placeholder="e.g., 6">
+        <button onclick="createMonthInputs()">Next</button>
+    </div>
+
+    <!-- Step 3: Monthly Values -->
+    <div id="step3" style="display:none;">
+        <div id="inputContainer"></div>
+        <button onclick="generateGraph()">Generate Graph & Analyze</button>
+    </div>
+
+    <canvas id="myChart" width="450" height="250"></canvas>
+    <div id="analysis"></div>
+</div>
+
+<script>
+let chartInstance = null;
+let disease = "";
+
+function nextStep(){
+    disease = document.getElementById("diseaseName").value.trim();
+    if(!disease){ alert("Enter disease name"); return; }
+    document.getElementById("step1").style.display="none";
+    document.getElementById("step2").style.display="block";
+}
+
+function createMonthInputs(){
+    const num = Number(document.getElementById("numMonths").value);
+    if(isNaN(num) || num <=0){ alert("Enter valid number of months"); return; }
+    const container = document.getElementById("inputContainer");
+    container.innerHTML="";
+    for(let i=1;i<=num;i++){
+        const div = document.createElement("div");
+        div.innerHTML = `Month ${i}: <input type="number" class="monthValue" placeholder="e.g., 140">`;
+        container.appendChild(div);
+    }
+    document.getElementById("step2").style.display="none";
+    document.getElementById("step3").style.display="block";
+}
+function analyzeDisease(name, values){
+    const avg = values.reduce((a,b)=>a+b,0)/values.length;
+    let result="", suggestion="";
+    if(name.toLowerCase().includes("diabetes")){
+        if(avg<70){ result="Low Blood Sugar"; suggestion="Eat carbs & monitor sugar"; }
+        else if(avg<=130){ result="Normal"; suggestion="Maintain diet & exercise"; }
+        else if(avg<=180){ result="Slightly High"; suggestion="Consult doctor & monitor diet"; }
+        else{ result="High"; suggestion="Immediate medical attention"; }
+    }
+    else if(name.toLowerCase().includes("hypertension")){
+        if(avg<90){ result="Low Blood Pressure"; suggestion="Monitor & hydrate"; }
+        else if(avg<=120){ result="Normal"; suggestion="Maintain healthy lifestyle"; }
+        else if(avg<=140){ result="Elevated"; suggestion="Reduce salt & exercise"; }
+        else{ result="High"; suggestion="Consult doctor immediately"; }
+    }
+    else{
+        result=`Average: ${avg.toFixed(2)}`; 
+        suggestion="Consult doctor for interpretation";
+    }
+    return {avg, result, suggestion};
+}
+
+function generateGraph(){
+    const valueInputs = document.querySelectorAll(".monthValue");
+    const values=[];
+    valueInputs.forEach(input=>{
+        const val = Number(input.value);
+        if(!isNaN(val)) values.push(val);
+    });
+    if(values.length===0){ alert("Enter values"); return; }
+
+    const months = values.map((v,i)=> "Month "+(i+1));
+
+    if(chartInstance) chartInstance.destroy();
+
+    chartInstance = new Chart(document.getElementById("myChart"),{
+        type:"line",
+        data:{
+            labels: months,
+            datasets:[{
+                label:disease,
+                data: values,
+                borderColor:"#4CAF50",
+                fill:false,
+                tension:0.3,
+                pointBackgroundColor:"#4CAF50",
+                pointRadius:5,
+                borderWidth:2
+            }]
+        },
+        options:{
+            responsive:false,
+            plugins:{ legend:{ position:'top' } },
+            scales:{ y:{ beginAtZero:true } }
+        }
+    });
+
+    const analysis = analyzeDisease(disease, values);
+    const analysisDiv = document.getElementById("analysis");
+    analysisDiv.innerHTML=`<h3>Analysis:</h3>
+        <p><strong>Average Value:</strong> ${analysis.avg.toFixed(2)}</p>
+        <p><strong>Health Status:</strong> ${analysis.result}</p>
+        <p><strong>Suggestion:</strong> ${analysis.suggestion}</p>`;
+}
+</script>
+
+</body>
+</html>
