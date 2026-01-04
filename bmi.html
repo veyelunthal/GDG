@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>BMI-Calculator</title>
+        <link rel="stylesheet" href="bmi.css">
+        <style>
+            body{
+    display: flex;
+    flex-direction: column;
+    margin: 5px;
+}
+.header{
+    margin: 5px;
+   padding: 20px;
+   background-color:rgb(103, 103, 252);
+   border-radius: 5px;
+   height: 75px;
+   width: 97%;
+}
+.form-box{
+
+  margin: auto;
+  height: 635px;
+  width: 420px;
+  padding: 20px;
+  background-color: rgb(183, 180, 180);
+  border-radius: 5px;
+  justify-items: center;
+  display: block;
+}
+form{
+    font-size:x-large;
+    display: block;
+}
+input{
+    width: 390px;
+  height: 20px;
+  border-radius: 4px;
+}
+.but{
+  margin: 10px;
+  padding: 10px;
+}
+:hover.but{
+    background-color:rgb(12, 54, 54);
+    color:white;
+    transform: scale(1.2);
+   
+    border-color: black;
+    border-width: 1px;
+    margin: 10px;
+}
+
+select{
+    width:390px;
+    height: 20px;
+}
+        </style>
+    </head>
+    <body>
+        <header>
+             <div class="header">
+               <h1><i>BMI-Calculator</i></h1>
+             </div>
+             <hr>
+        </header>
+         
+        <div class="form-box">
+        <form>
+            <br>
+            <br>
+            <label><i>Age : </i></label>
+            <input type="text" placeholder="2-120" id="age"><br><br>
+
+            <label><i>GENDER : </i></label>
+            <select id="gender">
+                <option value="">--select--</option>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+            </select><br><br>
+
+            <label><i>WEIGHT : </i></label>
+            <input type="text" placeholder="Ex: in kg" id="weight"><br><br>
+
+            <label><i>HEIGHT : </i></label>
+            <input type="text" placeholder="Ex: in meter" id="height"><br><br>
+
+            <button  class="but" type="button" onclick="calculate()">--Calculate--</button>
+            <button type="reset" class="but">--Reset--</button>
+        </form>
+
+        <div id="result"></div>
+        
+        <script>
+            function calculate() {
+
+    let age = parseInt(document.getElementById("age").value);
+    let gender = document.getElementById("gender").value;
+    let weight = parseFloat(document.getElementById("weight").value);
+    let height = parseFloat(document.getElementById("height").value);
+
+    
+    if (isNaN(age) || age <= 0) {
+        alert("Please enter a valid age");
+        return;
+    }
+
+    if (gender === "") {
+        alert("Please select gender");
+        return;
+    }
+
+    if (isNaN(weight) || weight <= 0) {
+        alert("Please enter a valid weight");
+        return;
+    }
+
+    if (isNaN(height) || height <= 0) {
+        alert("Please enter a valid height");
+        return;
+    }
+
+    
+    height = height / 100;
+
+    
+    let bmi = weight / (height * height);
+    bmi = bmi.toFixed(2);
+
+    let status = "";
+
+    if (gender === "male") {
+        if (bmi < 18.5) status = "Underweight (Male)";
+        else if (bmi < 25) status = "Normal weight (Male)";
+        else if (bmi < 30) status = "Overweight (Male)";
+        else status = "Obese (Male)";
+    } 
+    else if (gender === "female") {
+        if (bmi < 18.5) status = "Underweight (Female)";
+        else if (bmi < 24) status = "Normal weight (Female)";
+        else if (bmi < 29) status = "Overweight (Female)";
+        else status = "Obese (Female)";
+    }
+
+    document.getElementById("result").innerHTML = `
+        <h3>Your BMI Result</h3>
+        <p><strong>BMI Value:</strong> ${bmi}</p>
+        <p><strong>Category:</strong> ${status}</p>
+    `;
+}
+
+function resetForm() {
+    document.getElementById("age").value = "";
+    document.getElementById("gender").value = "";
+    document.getElementById("weight").value = "";
+    document.getElementById("height").value = "";
+    document.getElementById("result").innerHTML = "";
+}
+        </script>
+
+    </body>
+</html>
