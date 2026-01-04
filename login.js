@@ -48,3 +48,4 @@ form.addEventListener("submit", (e) => {
             errorMsg.textContent = error.message;
         });
 });
+
